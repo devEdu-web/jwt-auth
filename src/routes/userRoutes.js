@@ -10,6 +10,7 @@ router.post('/register', userController.register)
 router.get('/login', userController.getLoginPage)
 router.get('/register', userController.getRegisterPage)
 router.get('/user-page', authController.verifyAuthentication, userController.getUserPage)
+router.get('/logout', userController.logout)
 
 // router.get('/login', (req, res, next) => {
 //     // console.log(req.cookies)

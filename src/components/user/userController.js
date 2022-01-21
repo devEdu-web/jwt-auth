@@ -50,15 +50,20 @@ async function login(req, res, next) {
 }
 
 function getLoginPage(req, res, next) {
-    res.sendFile(path.join(__dirname, "..", "..", "views", "login.html"))
+    res.sendFile(path.join(__dirname, "..", "..", "..", "views", "login.html"))
 }
 
 function getRegisterPage(req, res, next) {
-    res.sendFile(path.join(__dirname, "..", "..", "views", "register.html"))
+    res.sendFile(path.join(__dirname, "..", "..", "..", "views", "register.html"))
 }
 
 function getUserPage(req, res, next) {
     res.render('user', {username: req.cookies.username})
 }
 
-module.exports = {register, login, getLoginPage, getRegisterPage, getUserPage}
+function logout(req, res, next) {
+    res.clearCookie('auth')
+    res.redirect('/user/login')
+}
+
+module.exports = {register, login, getLoginPage, getRegisterPage, getUserPage, logout}
