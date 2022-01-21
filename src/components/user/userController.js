@@ -1,4 +1,5 @@
 const User = require('./userModel')
+const authController = require('./authController')
 const bcrypt = require('bcrypt')
 const jsonwebtoken = require('jsonwebtoken')
 const path = require('path')
@@ -41,16 +42,21 @@ async function login(req, res, next) {
 
     res.cookie('username', selectedUser.name)
 
-    // res.render('user', {
-    //     username: selectedUser.name
-    // })
 
     res.redirect('/user/user-page')
 
 }
 
 function getLoginPage(req, res, next) {
-    res.sendFile(path.join(__dirname, "..", "..", "..", "views", "login.html"))
+    const userToken = req.cookies.auth
+    const isUserVerified = authController.validateToken(userToken)
+
+    if(isUserVerified) {
+        res.redirect('/user/user-page')
+    } else {
+        res.sendFile(path.join(__dirname, "..", "..", "..", "views", "login.html"))
+    }
+
 }
 
 function getRegisterPage(req, res, next) {
