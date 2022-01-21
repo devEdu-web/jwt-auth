@@ -22,4 +22,3 @@ The JWT token is generated when the user signs in, I set the token expiration to
 
 ***
 
-## What 
