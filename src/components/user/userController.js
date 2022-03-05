@@ -47,14 +47,7 @@ async function login(req, res, next) {
 
 }
 
-
-function logout(req, res, next) {
-    res.clearCookie("auth");
-    res.redirect("/user/login");
-}
-
 module.exports = {
     register,
     login,
-    logout,
 };
