@@ -14,52 +14,39 @@ async function register(req, res, next) {
 
     try {
         const user = await currentUser.save();
-        res.status(201).sendFile(path.join(__dirname, "..", "..", "..", "views", "login.html"));
-    } catch (e) {
-        console.log(e);
-        res.status(403).send(e);
+        res.status(201).json(user);
+    } catch (error) {
+        res.status(400).json({
+            error,
+            message: 'Email already exists.'
+        });
     }
 }
 
 async function login(req, res, next) {
-    const selectedUser = await User.findOne({ email: req.body.email });
-    if (!selectedUser)
-        return res.status(400).send("Email or password incorrect.");
 
-    const passwordMatch = await bcrypt.compare(
-        req.body.password,
-        selectedUser.password
-    );
-    if (!passwordMatch)
-        return res.status(400).send("Email or password incorrect");
+    try {
 
-    const userToken = jsonwebtoken.sign({ id: selectedUser._id, name: selectedUser.name }, process.env.JWT_SECRET, { expiresIn: 60, });
-    if (!userToken) return res.status(400).send("Email or password incorrect");
+        const fetchedUser = await User.findOne({ email: req.body.email });
+        const passwordMatch = await bcrypt.compare(req.body.password, fetchedUser.password);
 
-    res.cookie("auth", userToken, {httpOnly: true,});
-    res.cookie("username", selectedUser.name);
+        if (!fetchedUser || !passwordMatch) return res.status(400).json({
+            statusCode: 400,
+            message: 'Email or password invalid'
+        });
+    
+        const userToken = jsonwebtoken.sign({ id: fetchedUser._id, name: fetchedUser.name }, process.env.JWT_SECRET, { expiresIn: '1h', });
+        res.json({
+            access_token: userToken,
+            expiresIn: '1h'
+        })
 
-    res.redirect("/user/user-page");
-}
-
-function getLoginPage(req, res, next) {
-    const userToken = req.cookies.auth;
-    const isUserVerified = authController.validateToken(userToken);
-
-    if (isUserVerified) {
-        res.redirect("/user/user-page");
-    } else {
-        res.sendFile(path.join(__dirname, "..", "..", "..", "views", "login.html"));
+    } catch(error) {
+        res.status(500).json(error)
     }
+
 }
 
-function getRegisterPage(req, res, next) {
-    res.sendFile(path.join(__dirname, "..", "..", "..", "views", "register.html"));
-}
-
-function getUserPage(req, res, next) {
-    res.render("user", { username: req.cookies.username });
-}
 
 function logout(req, res, next) {
     res.clearCookie("auth");
@@ -69,8 +56,5 @@ function logout(req, res, next) {
 module.exports = {
     register,
     login,
-    getLoginPage,
-    getRegisterPage,
-    getUserPage,
     logout,
 };
